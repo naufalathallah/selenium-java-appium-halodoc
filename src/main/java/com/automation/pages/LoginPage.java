@@ -16,6 +16,15 @@ public class LoginPage extends BasePage {
     @AndroidFindBy(accessibility = "btnSubmit")
     private WebElement submitButton;
 
+    @AndroidFindBy(accessibility = "btnDaftar")
+    private WebElement registerButton;
+
+    @AndroidFindBy(accessibility = "btnMasuk")
+    private WebElement loginButton;
+
+    @AndroidFindBy(accessibility = "textCreateAccount")
+    private WebElement createAccountText;
+
     public LoginPage(AppiumDriver driver) {
         super(driver);
     }
@@ -33,6 +42,7 @@ public class LoginPage extends BasePage {
     }
 
     public void login(String email, String password) {
+        validateSplashScreen();
         enterEmail(email);
         enterPassword(password);
         clickSubmitButton();
@@ -50,7 +60,20 @@ public class LoginPage extends BasePage {
         return isElementDisplayed(submitButton);
     }
 
-    public boolean isLoginPageDisplayed() {
-        return isEmailInputDisplayed() && isPasswordInputDisplayed() && isSubmitButtonDisplayed();
+    public void validateSplashScreen() {
+        waitFor(10);
+
+        if (isElementDisplayed(loginButton)) {
+            click(loginButton);
+        }
+
+        scrollToBottom();
+
+        if (isElementDisplayed(createAccountText)) {
+            String sudahPunyaAkunText = getText(createAccountText);
+            if ("SUDAH PUNYA AKUN".equals(sudahPunyaAkunText)) {
+                click(createAccountText);
+            }
+        }
     }
 }

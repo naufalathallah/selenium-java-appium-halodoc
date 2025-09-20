@@ -1,7 +1,9 @@
 package com.automation.tests;
 
 import com.automation.base.BaseTest;
+import com.automation.pages.HomePage;
 import com.automation.pages.LoginPage;
+import com.automation.utils.TestDataReader;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -10,16 +12,13 @@ public class LoginTest extends BaseTest {
     @Test
     public void testLoginWithValidEmail() {
         LoginPage loginPage = new LoginPage(getDriver());
-        loginPage.waitFor(10);
-        
-        Assert.assertTrue(loginPage.isLoginPageDisplayed(), "Login page should be displayed");
-        String validEmail = "api1@yopmail.com";
-        String password = "Tdautomate123!";
 
-        loginPage.enterEmail(validEmail);
-        loginPage.enterPassword(password);
-        loginPage.clickSubmitButton();
+        String validEmail = TestDataReader.getValidEmail();
+        String password = TestDataReader.getValidPassword();
 
-        // Add assertions based on expected behavior
+        loginPage.login(validEmail, password);
+
+        HomePage homePage = new HomePage(getDriver());
+        Assert.assertTrue(homePage.isTemanDiabetesLogoDisplayed(), "Teman Diabetes logo should be displayed on homepage");
     }
 }

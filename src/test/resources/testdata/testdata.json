@@ -1,20 +1,6 @@
 {
-  "users": [
-    {
-      "username": "testuser1",
-      "password": "password123",
-      "email": "testuser1@example.com"
-    },
-    {
-      "username": "testuser2",
-      "password": "password456",
-      "email": "testuser2@example.com"
-    }
-  ],
   "testData": {
-    "validEmail": "valid@example.com",
-    "invalidEmail": "invalid-email",
-    "phoneNumber": "+1234567890",
-    "searchQuery": "test product"
+    "validEmail": "api1@yopmail.com",
+    "validPassword": "Tdautomate123!"
   }
 }

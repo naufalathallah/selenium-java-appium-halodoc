@@ -11,6 +11,10 @@ import org.apache.logging.log4j.Logger;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
 
+import java.io.File;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 public class ExtentReportListener implements ITestListener {
 
     private static ExtentReports extent;
@@ -19,17 +23,29 @@ public class ExtentReportListener implements ITestListener {
 
     @Override
     public void onStart(org.testng.ITestContext context) {
-        ExtentSparkReporter sparkReporter = new ExtentSparkReporter(AppConstants.EXTENT_REPORT_PATH);
+        // Create reports directory if it doesn't exist
+        File reportsDir = new File(AppConstants.REPORTS_PATH);
+        if (!reportsDir.exists()) {
+            reportsDir.mkdirs();
+        }
+
+        // Generate timestamped report name
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
+        String reportPath = AppConstants.REPORTS_PATH + "ExtentReport_" + timestamp + ".html";
+
+        ExtentSparkReporter sparkReporter = new ExtentSparkReporter(reportPath);
         sparkReporter.config().setDocumentTitle("Android Automation Test Report");
-        sparkReporter.config().setReportName("Test Execution Report");
+        sparkReporter.config().setReportName("Test Execution Report - " + timestamp);
 
         extent = new ExtentReports();
         extent.attachReporter(sparkReporter);
         extent.setSystemInfo("Platform", "Android");
         extent.setSystemInfo("Environment", "Test");
         extent.setSystemInfo("User", System.getProperty("user.name"));
+        extent.setSystemInfo("Java Version", System.getProperty("java.version"));
+        extent.setSystemInfo("OS", System.getProperty("os.name"));
 
-        logger.info("Extent Report initialized");
+        logger.info("Extent Report initialized at: " + reportPath);
     }
 
     @Override
@@ -65,8 +81,11 @@ public class ExtentReportListener implements ITestListener {
 
     @Override
     public void onFinish(org.testng.ITestContext context) {
-        extent.flush();
-        logger.info("Extent Report generated successfully");
+        if (extent != null) {
+            extent.flush();
+            logger.info("Extent Report generated successfully");
+            logger.info("Report location: " + AppConstants.REPORTS_PATH);
+        }
     }
 
     public static ExtentTest getExtentTest() {

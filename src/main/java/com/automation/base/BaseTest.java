@@ -26,8 +26,8 @@ public class BaseTest {
             options.setDeviceName("TCJRWCW8NZ6P9HQW");
             options.setAutomationName("UIAutomator2");
             options.setAutoGrantPermissions(true);
-            options.setAppPackage("com.lionparcel.genesis.mobile.stg");
-            options.setAppActivity("com.lionparcel.genesis.mobile.view.authentication.AuthenticationActivity");
+            options.setAppPackage("com.temandiabetes.android");
+            options.setAppActivity(".MainActivity");
             options.setNewCommandTimeout(Duration.ofSeconds(300));
             options.setUdid("TCJRWCW8NZ6P9HQW");
 

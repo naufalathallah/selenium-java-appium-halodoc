@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suite name="AndroidAutomationSuite" verbose="1">
+    <listeners>
+        <listener class-name="com.automation.listeners.ExtentReportListener"/>
+    </listeners>
+
+    <test name="SampleTests">
+        <classes>
+            <class name="com.automation.tests.SampleTest"/>
+        </classes>
+    </test>
+</suite>

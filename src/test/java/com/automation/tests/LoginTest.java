@@ -1,12 +1,15 @@
 package com.automation.tests;
 
 import com.automation.base.BaseTest;
+import com.automation.listeners.ExtentReportListener;
 import com.automation.pages.HomePage;
 import com.automation.pages.LoginPage;
 import com.automation.utils.TestDataReader;
 import org.testng.Assert;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+@Listeners(ExtentReportListener.class)
 public class LoginTest extends BaseTest {
 
     @Test

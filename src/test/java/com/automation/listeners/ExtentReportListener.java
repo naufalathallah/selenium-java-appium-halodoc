@@ -12,14 +12,13 @@ import org.testng.ITestListener;
 import org.testng.ITestResult;
 
 import java.io.File;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 public class ExtentReportListener implements ITestListener {
 
     private static ExtentReports extent;
     private static ThreadLocal<ExtentTest> extentTest = new ThreadLocal<>();
     private static final Logger logger = LogManager.getLogger(ExtentReportListener.class);
+    private static int reportCounter = -1; // Initialize to -1 so first call sets it correctly
 
     @Override
     public void onStart(org.testng.ITestContext context) {
@@ -29,13 +28,17 @@ public class ExtentReportListener implements ITestListener {
             reportsDir.mkdirs();
         }
 
-        // Generate epoch-based report name
-        long epoch = System.currentTimeMillis();
-        String reportPath = AppConstants.REPORTS_PATH + "ExtentReport_" + epoch + ".html";
+        // Generate incremental report name
+        if (reportCounter == -1) {
+            reportCounter = getNextAvailableReportCounter();
+        } else {
+            reportCounter++;
+        }
+        String reportPath = AppConstants.REPORTS_PATH + "ExtentReport-" + reportCounter + ".html";
 
         ExtentSparkReporter sparkReporter = new ExtentSparkReporter(reportPath);
         sparkReporter.config().setDocumentTitle("Android Automation Test Report");
-        sparkReporter.config().setReportName("Test Execution Report - " + epoch);
+        sparkReporter.config().setReportName("Test Execution Report - " + reportCounter);
 
         extent = new ExtentReports();
         extent.attachReporter(sparkReporter);
@@ -110,5 +113,30 @@ public class ExtentReportListener implements ITestListener {
 
     public static ExtentTest getExtentTest() {
         return extentTest.get();
+    }
+
+    private static int getNextAvailableReportCounter() {
+        File reportsDir = new File(AppConstants.REPORTS_PATH);
+        if (!reportsDir.exists()) {
+            return 1; // Start from 1 if directory doesn't exist
+        }
+
+        int maxCounter = 0;
+        File[] files = reportsDir.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                String fileName = file.getName();
+                if (fileName.startsWith("ExtentReport-") && fileName.endsWith(".html")) {
+                    try {
+                        String numberStr = fileName.substring(13, fileName.length() - 5); // Extract number from "ExtentReport-X.html"
+                        int counter = Integer.parseInt(numberStr);
+                        maxCounter = Math.max(maxCounter, counter);
+                    } catch (NumberFormatException e) {
+                        // Ignore files that don't match the pattern
+                    }
+                }
+            }
+        }
+        return maxCounter + 1; // Return next available number
     }
 }

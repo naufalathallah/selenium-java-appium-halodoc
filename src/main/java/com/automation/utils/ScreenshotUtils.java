@@ -9,7 +9,6 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 
 import java.io.File;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -20,6 +19,12 @@ public class ScreenshotUtils {
 
     public static String captureScreenshot(String testName) {
         try {
+            // Check if driver exists
+            if (BaseTest.getDriver() == null) {
+                logger.warn("Driver is null, cannot capture screenshot");
+                return null;
+            }
+
             TakesScreenshot takesScreenshot = (TakesScreenshot) BaseTest.getDriver();
             File sourceFile = takesScreenshot.getScreenshotAs(OutputType.FILE);
 
@@ -33,8 +38,8 @@ public class ScreenshotUtils {
 
             logger.info("Screenshot captured: " + screenshotPath);
             return screenshotPath;
-        } catch (IOException e) {
-            logger.error("Failed to capture screenshot: " + e.getMessage());
+        } catch (Exception e) {
+            logger.error("Failed to capture screenshot for test '" + testName + "': " + e.getMessage(), e);
             return null;
         }
     }

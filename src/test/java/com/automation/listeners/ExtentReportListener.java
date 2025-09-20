@@ -29,13 +29,13 @@ public class ExtentReportListener implements ITestListener {
             reportsDir.mkdirs();
         }
 
-        // Generate timestamped report name
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
-        String reportPath = AppConstants.REPORTS_PATH + "ExtentReport_" + timestamp + ".html";
+        // Generate epoch-based report name
+        long epoch = System.currentTimeMillis();
+        String reportPath = AppConstants.REPORTS_PATH + "ExtentReport_" + epoch + ".html";
 
         ExtentSparkReporter sparkReporter = new ExtentSparkReporter(reportPath);
         sparkReporter.config().setDocumentTitle("Android Automation Test Report");
-        sparkReporter.config().setReportName("Test Execution Report - " + timestamp);
+        sparkReporter.config().setReportName("Test Execution Report - " + epoch);
 
         extent = new ExtentReports();
         extent.attachReporter(sparkReporter);
@@ -63,14 +63,28 @@ public class ExtentReportListener implements ITestListener {
 
     @Override
     public void onTestFailure(ITestResult result) {
-        extentTest.get().log(Status.FAIL, "Test failed: " + result.getThrowable());
+        try {
+            extentTest.get().log(Status.FAIL, "Test failed: " + result.getThrowable().getMessage());
 
-        String screenshotPath = ScreenshotUtils.captureScreenshot(result.getMethod().getMethodName());
-        if (screenshotPath != null) {
-            extentTest.get().addScreenCaptureFromPath(screenshotPath);
+            // Capture screenshot on failure
+            String screenshotPath = ScreenshotUtils.captureScreenshot(result.getMethod().getMethodName() + "_FAILED");
+            if (screenshotPath != null) {
+                // Convert to relative path from reports directory to screenshots directory
+                String relativePath = "../screenshots/" + new File(screenshotPath).getName();
+                extentTest.get().addScreenCaptureFromPath(relativePath);
+                logger.info("Screenshot captured for failed test: " + screenshotPath);
+                logger.info("Relative path added to report: " + relativePath);
+            } else {
+                logger.warn("Failed to capture screenshot for test: " + result.getMethod().getMethodName());
+            }
+
+            // Log full stack trace
+            extentTest.get().log(Status.FAIL, "Full Exception: " + result.getThrowable().toString());
+
+            logger.error("Test failed: " + result.getMethod().getMethodName(), result.getThrowable());
+        } catch (Exception e) {
+            logger.error("Error in onTestFailure handler: " + e.getMessage(), e);
         }
-
-        logger.error("Test failed: " + result.getMethod().getMethodName(), result.getThrowable());
     }
 
     @Override
@@ -81,10 +95,16 @@ public class ExtentReportListener implements ITestListener {
 
     @Override
     public void onFinish(org.testng.ITestContext context) {
-        if (extent != null) {
-            extent.flush();
-            logger.info("Extent Report generated successfully");
-            logger.info("Report location: " + AppConstants.REPORTS_PATH);
+        try {
+            if (extent != null) {
+                extent.flush();
+                logger.info("Extent Report generated successfully");
+                logger.info("Report location: " + AppConstants.REPORTS_PATH);
+            } else {
+                logger.warn("ExtentReports instance is null, report may not have been generated");
+            }
+        } catch (Exception e) {
+            logger.error("Error during report finalization: " + e.getMessage(), e);
         }
     }
 

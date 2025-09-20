@@ -10,10 +10,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
+import org.testng.ISuiteListener;
+import org.testng.ISuite;
 
 import java.io.File;
 
-public class ExtentReportListener implements ITestListener {
+public class ExtentReportListener implements ITestListener, ISuiteListener {
 
     private static ExtentReports extent;
     private static ThreadLocal<ExtentTest> extentTest = new ThreadLocal<>();
@@ -21,7 +23,8 @@ public class ExtentReportListener implements ITestListener {
     private static int reportCounter = -1; // Initialize to -1 so first call sets it correctly
 
     @Override
-    public void onStart(org.testng.ITestContext context) {
+    public void onStart(ISuite suite) {
+        // Initialize ExtentReports once for the entire suite
         // Create reports directory if it doesn't exist
         File reportsDir = new File(AppConstants.REPORTS_PATH);
         if (!reportsDir.exists()) {
@@ -49,6 +52,26 @@ public class ExtentReportListener implements ITestListener {
         extent.setSystemInfo("OS", System.getProperty("os.name"));
 
         logger.info("Extent Report initialized at: " + reportPath);
+    }
+
+    @Override
+    public void onFinish(ISuite suite) {
+        try {
+            if (extent != null) {
+                extent.flush();
+                logger.info("Extent Report generated successfully");
+                logger.info("Report location: " + AppConstants.REPORTS_PATH);
+            } else {
+                logger.warn("ExtentReports instance is null, report may not have been generated");
+            }
+        } catch (Exception e) {
+            logger.error("Error during report finalization: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void onStart(org.testng.ITestContext context) {
+        // Do nothing - initialization is handled at suite level
     }
 
     @Override
@@ -98,17 +121,8 @@ public class ExtentReportListener implements ITestListener {
 
     @Override
     public void onFinish(org.testng.ITestContext context) {
-        try {
-            if (extent != null) {
-                extent.flush();
-                logger.info("Extent Report generated successfully");
-                logger.info("Report location: " + AppConstants.REPORTS_PATH);
-            } else {
-                logger.warn("ExtentReports instance is null, report may not have been generated");
-            }
-        } catch (Exception e) {
-            logger.error("Error during report finalization: " + e.getMessage(), e);
-        }
+        // Do nothing - finalization is handled at suite level
+        logger.debug("Test context finished: " + context.getName());
     }
 
     public static ExtentTest getExtentTest() {

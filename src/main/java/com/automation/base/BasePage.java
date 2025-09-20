@@ -65,4 +65,14 @@ public class BasePage {
             return false;
         }
     }
+
+    public void waitFor(int seconds) {
+        try {
+            Thread.sleep(seconds * 1000L);
+            logger.info("Waited for " + seconds + " seconds");
+        } catch (InterruptedException e) {
+            logger.error("Wait interrupted: " + e.getMessage());
+            Thread.currentThread().interrupt();
+        }
+    }
 }

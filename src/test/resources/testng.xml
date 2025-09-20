@@ -9,4 +9,10 @@
             <class name="com.automation.tests.SampleTest"/>
         </classes>
     </test>
+
+    <test name="LoginTests">
+        <classes>
+            <class name="com.automation.tests.LoginTest"/>
+        </classes>
+    </test>
 </suite>

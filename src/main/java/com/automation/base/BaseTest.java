@@ -22,12 +22,16 @@ public class BaseTest {
         try {
             UiAutomator2Options options = new UiAutomator2Options();
             options.setPlatformName("Android");
-            options.setDeviceName("emulator-5554");
-            options.setAutomationName("UiAutomator2");
+            options.setPlatformVersion("13");
+            options.setDeviceName("TCJRWCW8NZ6P9HQW");
+            options.setAutomationName("UIAutomator2");
+            options.setAutoGrantPermissions(true);
+            options.setAppPackage("com.temandiabetes.android");
+            options.setAppActivity(".MainActivity");
             options.setNewCommandTimeout(Duration.ofSeconds(300));
-            options.setUdid("emulator-5554");
+            options.setUdid("TCJRWCW8NZ6P9HQW");
 
-            driver = new AndroidDriver(new URL("http://localhost:4723/wd/hub"), options);
+            driver = new AndroidDriver(new URL("http://localhost:4723"), options);
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
 
             logger.info("Driver initialized successfully");

@@ -1,5 +1,7 @@
 package com.automation.listeners;
 
+import com.automation.base.BaseTest;
+import com.automation.utils.ScreenshotUtils;
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.Status;
@@ -80,6 +82,25 @@ public class CucumberExtentReportListener implements EventListener {
                     break;
                 case FAILED:
                     stepTest.log(Status.FAIL, "Step failed: " + event.getResult().getError().getMessage());
+
+                    // Capture screenshot on failure
+                    try {
+                        if (BaseTest.getDriver() != null) {
+                            PickleStepTestStep pickleStep = (PickleStepTestStep) event.getTestStep();
+                            String stepName = pickleStep.getStep().getText().replaceAll("[^a-zA-Z0-9]", "_");
+                            String screenshotPath = ScreenshotUtils.captureScreenshot(stepName + "_FAILED");
+
+                            if (screenshotPath != null) {
+                                // Convert to relative path for report
+                                String relativePath = "../screenshots/" + new File(screenshotPath).getName();
+                                stepTest.addScreenCaptureFromPath(relativePath);
+                                stepTest.log(Status.INFO, "Screenshot captured: " + relativePath);
+                            }
+                        }
+                    } catch (Exception e) {
+                        stepTest.log(Status.WARNING, "Failed to capture screenshot: " + e.getMessage());
+                    }
+
                     if (event.getResult().getError() != null) {
                         stepTest.log(Status.FAIL, event.getResult().getError());
                     }
@@ -104,6 +125,29 @@ public class CucumberExtentReportListener implements EventListener {
                     break;
                 case FAILED:
                     scenarioTest.log(Status.FAIL, "Scenario failed: " + event.getResult().getError().getMessage());
+
+                    // Attach latest screenshot to report (captured by Hooks)
+                    try {
+                        File screenshotsDir = new File("src/test/resources/screenshots");
+                        if (screenshotsDir.exists()) {
+                            File[] screenshots = screenshotsDir.listFiles((dir, name) -> name.endsWith(".png"));
+                            if (screenshots != null && screenshots.length > 0) {
+                                // Get the latest screenshot
+                                File latestScreenshot = screenshots[0];
+                                for (File screenshot : screenshots) {
+                                    if (screenshot.lastModified() > latestScreenshot.lastModified()) {
+                                        latestScreenshot = screenshot;
+                                    }
+                                }
+
+                                String relativePath = "../screenshots/" + latestScreenshot.getName();
+                                scenarioTest.addScreenCaptureFromPath(relativePath);
+                                scenarioTest.log(Status.INFO, "Failure screenshot attached: " + relativePath);
+                            }
+                        }
+                    } catch (Exception e) {
+                        scenarioTest.log(Status.WARNING, "Failed to attach screenshot: " + e.getMessage());
+                    }
                     break;
                 case SKIPPED:
                     scenarioTest.log(Status.SKIP, "Scenario was skipped");

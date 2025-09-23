@@ -102,17 +102,19 @@ mvn test -Dtest=TestRunner -Dcucumber.filter.tags="@tc-2"
 
 #### Run by Test Categories:
 ```bash
-# Run all smoke tests
+# Mobile UI Tests
 mvn test -Dtest=TestRunner -Dcucumber.filter.tags="@smoke"
-
-# Run all regression tests
 mvn test -Dtest=TestRunner -Dcucumber.filter.tags="@regression"
 
-# Run combination (TC-1 AND smoke)
-mvn test -Dtest=TestRunner -Dcucumber.filter.tags="@tc-1 and @smoke"
+# API Tests (RestAssured)
+mvn test -Dtest=TestRunner -Dcucumber.filter.tags="@api"
 
-# Run either (TC-1 OR TC-2)
-mvn test -Dtest=TestRunner -Dcucumber.filter.tags="@tc-1 or @tc-2"
+# Visual Tests (Percy)
+mvn test -Dtest=TestRunner -Dcucumber.filter.tags="@visual"
+
+# Combined Tests
+mvn test -Dtest=TestRunner -Dcucumber.filter.tags="@tc-1 and @smoke"
+mvn test -Dtest=TestRunner -Dcucumber.filter.tags="@api or @visual"
 ```
 
 #### Run All BDD Tests:
@@ -244,10 +246,28 @@ Error: Element not located
 
 ## 📱 Supported Test Types
 
-1. **UI Automation** - Mobile app interaction testing
-2. **API Testing** - RestAssured integration for backend validation
-3. **Visual Testing** - Percy tool for visual regression
-4. **Cross-platform** - Selenium WebDriver for web testing
+### 1. **Mobile UI Automation**
+- App interaction testing via Appium
+- Page Object Model implementation
+- BDD scenarios with Cucumber
+
+### 2. **API Testing (RestAssured)**
+- HTTP methods: GET, POST, PUT, DELETE
+- JSON response validation
+- Status code verification
+- API endpoint: `https://jsonplaceholder.typicode.com`
+
+### 3. **Visual Testing (Percy)**
+- Visual regression testing
+- Screenshot comparison
+- UI change detection
+- Cross-browser visual validation
+
+### 4. **Integrated Reporting**
+- Step-by-step execution details
+- Screenshot capture on failures
+- API response logging
+- Visual diff reports
 
 ## 🚀 CI/CD Integration
 

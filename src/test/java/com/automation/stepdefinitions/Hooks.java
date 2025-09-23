@@ -7,12 +7,12 @@ import io.cucumber.java.Scenario;
 
 public class Hooks extends BaseTest {
 
-    @Before
+    @Before("not @api")
     public void setUp(Scenario scenario) {
         super.setUp();
     }
 
-    @After
+    @After("not @api")
     public void tearDown(Scenario scenario) {
         if (scenario.isFailed()) {
             System.out.println("Scenario failed: " + scenario.getName());

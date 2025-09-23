@@ -4,7 +4,8 @@
       "Bash(mkdir:*)",
       "Bash(mvn dependency:*)",
       "Bash(mvn clean:*)",
-      "Bash(mvn test:*)"
+      "Bash(mvn test:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

@@ -9,14 +9,14 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.testng.Assert;
 
-public class LoginStepDefinitions extends BaseTest {
+public class LoginStepDefinitions {
 
     private LoginPage loginPage;
     private HomePage homePage;
 
     @Given("Open Application")
     public void openApplication() {
-        loginPage = new LoginPage(getDriver());
+        loginPage = new LoginPage(BaseTest.getDriver());
         loginPage.validateSplashScreen();
     }
 
@@ -51,14 +51,14 @@ public class LoginStepDefinitions extends BaseTest {
 
     @Then("I should be redirected to the home page")
     public void iShouldBeRedirectedToTheHomePage() {
-        homePage = new HomePage(getDriver());
+        homePage = new HomePage(BaseTest.getDriver());
         Assert.assertTrue(homePage.isTemanDiabetesLogoDisplayed(),
             "User should be redirected to home page");
     }
 
     @Then("I should see {string}")
     public void iShouldSee(String expectedResult) {
-        homePage = new HomePage(getDriver());
+        homePage = new HomePage(BaseTest.getDriver());
         switch (expectedResult) {
             case "homepage":
                 Assert.assertTrue(homePage.isTemanDiabetesLogoDisplayed(),

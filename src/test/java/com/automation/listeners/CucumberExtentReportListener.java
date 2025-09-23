@@ -76,9 +76,37 @@ public class CucumberExtentReportListener implements EventListener {
 
     private void onTestStepFinished(TestStepFinished event) {
         if (stepTest != null && event.getTestStep() instanceof PickleStepTestStep) {
+            PickleStepTestStep pickleStep = (PickleStepTestStep) event.getTestStep();
             switch (event.getResult().getStatus()) {
                 case PASSED:
                     stepTest.log(Status.PASS, "Step executed successfully");
+
+                    // Check if this is a visual screenshot step
+                    String stepText = pickleStep.getStep().getText();
+                    if (stepText.contains("capture visual screenshot")) {
+                        try {
+                            // Find the latest screenshot for visual tests
+                            File screenshotsDir = new File("src/test/resources/screenshots");
+                            if (screenshotsDir.exists()) {
+                                File[] screenshots = screenshotsDir.listFiles((dir, name) -> name.endsWith(".png"));
+                                if (screenshots != null && screenshots.length > 0) {
+                                    // Get the latest screenshot
+                                    File latestScreenshot = screenshots[0];
+                                    for (File screenshot : screenshots) {
+                                        if (screenshot.lastModified() > latestScreenshot.lastModified()) {
+                                            latestScreenshot = screenshot;
+                                        }
+                                    }
+
+                                    String relativePath = "../screenshots/" + latestScreenshot.getName();
+                                    stepTest.addScreenCaptureFromPath(relativePath);
+                                    stepTest.log(Status.INFO, "Visual screenshot attached: " + relativePath);
+                                }
+                            }
+                        } catch (Exception e) {
+                            stepTest.log(Status.WARNING, "Failed to attach visual screenshot: " + e.getMessage());
+                        }
+                    }
                     break;
                 case FAILED:
                     stepTest.log(Status.FAIL, "Step failed: " + event.getResult().getError().getMessage());
@@ -86,7 +114,6 @@ public class CucumberExtentReportListener implements EventListener {
                     // Capture screenshot on failure
                     try {
                         if (BaseTest.getDriver() != null) {
-                            PickleStepTestStep pickleStep = (PickleStepTestStep) event.getTestStep();
                             String stepName = pickleStep.getStep().getText().replaceAll("[^a-zA-Z0-9]", "_");
                             String screenshotPath = ScreenshotUtils.captureScreenshot(stepName + "_FAILED");
 

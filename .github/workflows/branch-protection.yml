@@ -1,0 +1,85 @@
+name: Branch Protection Checks
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  code-quality:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Java 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+
+    - name: Compile project
+      run: |
+        echo "Compiling project..."
+        mvn clean compile test-compile
+
+    - name: Validate project structure
+      run: |
+        echo "Validating project structure..."
+
+        # Check if required directories exist
+        required_dirs=(
+          "src/test/resources/features"
+          "src/test/java/com/automation/stepdefinitions"
+          "src/test/java/com/automation/api"
+        )
+
+        for dir in "${required_dirs[@]}"; do
+          if [ ! -d "$dir" ]; then
+            echo "❌ Required directory missing: $dir"
+            exit 1
+          else
+            echo "✅ Directory exists: $dir"
+          fi
+        done
+
+    - name: Check API feature files
+      run: |
+        echo "Checking API feature files..."
+
+        if [ ! -f "src/test/resources/features/ApiTesting.feature" ]; then
+          echo "❌ ApiTesting.feature is missing"
+          exit 1
+        fi
+
+        # Check if API feature file contains required tags
+        if ! grep -q "@api" src/test/resources/features/ApiTesting.feature; then
+          echo "❌ @api tag missing in ApiTesting.feature"
+          exit 1
+        fi
+
+        if ! grep -q "@regression" src/test/resources/features/ApiTesting.feature; then
+          echo "❌ @regression tag missing in ApiTesting.feature"
+          exit 1
+        fi
+
+        echo "✅ API feature file validation passed"
+
+    - name: Quick API test validation
+      run: |
+        echo "Running quick API test validation..."
+
+        # Test if API tests can be discovered
+        mvn test -Dtest=TestRunner -Dcucumber.filter.tags="@api" -DdryRun=true
+
+        echo "✅ API tests validation completed"
+

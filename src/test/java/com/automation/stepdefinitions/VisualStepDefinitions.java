@@ -9,7 +9,7 @@ import io.cucumber.java.en.When;
 
 import java.io.File;
 
-public class VisualStepDefinitions extends BaseTest {
+public class VisualStepDefinitions {
 
     private LoginPage loginPage;
     private String lastScreenshotPath;
@@ -21,7 +21,7 @@ public class VisualStepDefinitions extends BaseTest {
 
     @When("I am on the login screen")
     public void iAmOnTheLoginScreen() {
-        loginPage = new LoginPage(getDriver());
+        loginPage = new LoginPage(BaseTest.getDriver());
         loginPage.validateSplashScreen();
     }
 

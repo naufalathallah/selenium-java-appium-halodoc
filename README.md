@@ -271,17 +271,61 @@ Error: Element not located
 
 ## 🚀 CI/CD Integration
 
-### Maven Commands for CI:
+### GitHub Actions Workflows
+
+#### 1. **API Testing CI/CD** (`api-testing.yml`)
+**Purpose:** Enforces API testing before merge to main branch
+- **Trigger:** Pull requests to main
+- **Required Tests:** `@api` and `@api and @regression`
+- **Status:** ❌ **BLOCKS MERGE** if tests fail
+
 ```bash
-# Build and test
-mvn clean compile test -Dtest=TestRunner
-
-# Generate reports only
-mvn test -Dtest=TestRunner -Dcucumber.filter.tags="@smoke"
-
-# Parallel execution (future enhancement)
-mvn test -Dtest=TestRunner -DthreadCount=2
+# Tests that run automatically:
+mvn test -Dtest=TestRunner -Dcucumber.filter.tags="@api"
+mvn test -Dtest=TestRunner -Dcucumber.filter.tags="@api and @regression"
 ```
+
+#### 2. **Branch Protection** (`branch-protection.yml`)
+**Purpose:** Code quality and security checks
+- **Trigger:** Pull requests to main
+- **Checks:** Project structure, feature files, secrets scan
+- **Status:** ❌ **BLOCKS MERGE** if checks fail
+
+#### 3. **Complete Test Suite** (`complete-test-suite.yml`)
+**Purpose:** Comprehensive scheduled testing
+- **Trigger:** Daily schedule + manual dispatch
+- **Tests:** API, smoke, regression suites
+- **Status:** ℹ️ **INFORMATIONAL** (doesn't block merge)
+
+### Branch Protection Rules
+
+**Main branch is protected and requires:**
+- ✅ API tests pass (`@api` tag)
+- ✅ API regression tests pass (`@api and @regression`)
+- ✅ Code quality checks pass
+- ✅ At least 1 PR review
+- ✅ Branch up-to-date with main
+
+### Manual CI Commands:
+```bash
+# Local testing before push
+mvn clean test -Dtest=TestRunner -Dcucumber.filter.tags="@api"
+
+# Validate project structure
+mvn clean compile test-compile
+
+# Run specific test combinations
+mvn test -Dtest=TestRunner -Dcucumber.filter.tags="@api and @smoke"
+mvn test -Dtest=TestRunner -Dcucumber.filter.tags="@api and @regression"
+```
+
+### 🎯 CI/CD Flow:
+1. **Developer** creates feature branch
+2. **Developer** pushes code changes
+3. **GitHub Actions** runs API tests automatically
+4. **Tests must pass** before merge is allowed
+5. **Code review** required before merge
+6. **Merge to main** only after all checks ✅
 
 ## 🤝 Contributing
 

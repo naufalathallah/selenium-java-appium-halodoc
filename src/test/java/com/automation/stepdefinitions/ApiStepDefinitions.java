@@ -1,13 +1,14 @@
 package com.automation.stepdefinitions;
 
 import com.automation.api.ApiTestHelper;
+import com.automation.base.BaseApiTest;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.restassured.response.Response;
 import org.testng.Assert;
 
-public class ApiStepDefinitions {
+public class ApiStepDefinitions extends BaseApiTest {
 
     private Response response;
 

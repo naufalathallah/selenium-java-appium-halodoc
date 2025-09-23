@@ -29,78 +29,10 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
 
-    - name: Run API Tests with @api tag
-      run: |
-        echo "Running API tests with @api tag..."
-        mvn clean test -Dtest=TestRunner -Dcucumber.filter.tags="@api" -Dmaven.test.failure.ignore=false
-      continue-on-error: false
-
     - name: Run API Regression Tests
       run: |
         echo "Running API regression tests..."
-        mvn test -Dtest=TestRunner -Dcucumber.filter.tags="@api and @regression" -Dmaven.test.failure.ignore=false
-      continue-on-error: false
-
-    - name: Generate Test Reports
-      if: always()
-      run: |
-        echo "Generating test reports..."
-        find target -name "*.html" -o -name "*.json" -o -name "*.xml" | head -10
-
-    - name: Upload Test Reports
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: api-test-reports
-        path: |
-          target/cucumber-reports/
-          target/surefire-reports/
-        retention-days: 30
-
-    - name: Upload Extent Reports
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: extent-reports
-        path: src/test/resources/reports/
-        retention-days: 30
-
-    - name: Comment PR with Test Results
-      if: github.event_name == 'pull_request' && always()
-      uses: actions/github-script@v6
-      with:
-        script: |
-          const fs = require('fs');
-
-          // Read test results
-          let testStatus = 'PASSED ✅';
-          let message = `## 🧪 API Test Results\n\n`;
-
-          if ('${{ job.status }}' !== 'success') {
-            testStatus = 'FAILED ❌';
-            message += `**Status:** ${testStatus}\n\n`;
-            message += `❌ API tests failed. Please fix the issues before merging.\n\n`;
-            message += `### Tests Run:\n`;
-            message += `- ✅ @api tag tests\n`;
-            message += `- ✅ @api and @regression tests\n\n`;
-            message += `### Artifacts:\n`;
-            message += `- 📊 Test reports available in GitHub Actions artifacts\n`;
-            message += `- 📋 Detailed reports in extent-reports artifact\n`;
-          } else {
-            message += `**Status:** ${testStatus}\n\n`;
-            message += `✅ All API tests passed successfully!\n\n`;
-            message += `### Tests Run:\n`;
-            message += `- ✅ @api tag tests: PASSED\n`;
-            message += `- ✅ @api and @regression tests: PASSED\n\n`;
-            message += `### Ready for merge! 🚀\n`;
-          }
-
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: message
-          });
+        mvn clean test -Dtest=TestRunner -Dcucumber.filter.tags="@api and @regression"
 
     - name: Send Discord notification
       if: always()
@@ -144,7 +76,7 @@ jobs:
                    },
                    {
                      \"name\": \"Tests Run\",
-                     \"value\": \"@api tag tests\\n@api and @regression tests\",
+                     \"value\": \"@api and @regression tests\",
                      \"inline\": false
                    },
                    {
